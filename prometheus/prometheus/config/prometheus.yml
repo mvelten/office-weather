@@ -1,0 +1,30 @@
+## prometheus.yml ##
+
+global:
+  scrape_interval: 15s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
+  # scrape_timeout is set to the global default (10s).
+
+  # Attach these extra labels to all time-series collected by this Prometheus instance.
+  external_labels:
+    monitor: 'weather-monitor'
+
+rule_files:
+  - '/prometheus-config/alert.rules.yml'
+
+# A scrape configuration containing exactly one endpoint to scrape:
+scrape_configs:
+
+###
+# Office Weather
+##
+
+  - job_name: 'weather01'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    metrics_path: /
+
+    static_configs:
+      - targets: ['sensor:8000']
+        labels:
+          group: 'weather'

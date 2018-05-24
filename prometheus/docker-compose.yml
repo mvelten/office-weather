@@ -1,0 +1,48 @@
+version: '2'
+
+services:
+  sensor:
+    image: sensor
+    privileged: true
+    volumes: 
+      - /dev/hidraw6:/dev/hidraw0
+    ports:
+      - 8080:8000
+
+  prometheus:
+    image: prom/prometheus:v2.0.0
+    entrypoint:
+      - /bin/prometheus
+      - --config.file=/prometheus-config/prometheus.yml 
+      - --storage.tsdb.retention=168h
+    volumes:
+      #- /data/prometheus/app:/prometheus
+      - ./prometheus/config:/prometheus-config
+    ports: 
+      - 9090:9090
+
+  grafana:
+    image: grafana/grafana:4.6.2
+    entrypoint:
+      - /run.sh
+      - --config
+      - /etc/grafana/grafana.ini
+    volumes:
+      #- /data/grafana/app:/var/lib/grafana
+      - ./grafana/config:/etc/grafana
+    ports:
+      - 3000:3000
+
+  config2grafana:
+    image: node:carbon
+    working_dir: /config/grafana
+    command: |
+      /bin/bash -c "
+        npm install -g wizzy
+        wizzy export datasources
+        wizzy export dashboards
+      "
+    depends_on: 
+      - grafana
+    volumes:
+      - ./grafana:/config/grafana

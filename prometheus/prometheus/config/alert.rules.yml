@@ -1,0 +1,14 @@
+## Alert-Rules ##
+
+groups:
+- name: weather
+  rules:
+  - alert: ToHotToConcentrate
+    expr: temperature_value >= 20
+    for: 1m
+    labels:
+      service: office-weather
+    annotations:
+      description: 'Summer detected by sensor {{ $labels.job }}'
+      summary: It's hot in here
+  

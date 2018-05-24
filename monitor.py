@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/local/bin/python
 
 # based on code by henryk ploetz
 # https://hackaday.io/project/5301-reverse-engineering-a-low-cost-usb-co-monitor/log/17909-all-your-base-are-belong-to-us
@@ -6,8 +6,9 @@
 # https://blog.wooga.com/woogas-office-weather-wow-67e24a5338
 
 import os, sys, fcntl, time, socket
-from prometheus_client import start_http_server, Gauge
+from prometheus_client import start_http_server, Gauge, Summary
 import requests
+
 
 def callback_function(error, result):
     if error:
@@ -16,6 +17,16 @@ def callback_function(error, result):
 
     print(result)
 
+def hd(d):
+    return " ".join("%02X" % e for e in d)
+
+def now():
+    return int(time.time())
+
+# Create a metric to track time spent and requests made.
+decrypt_time = Summary('decrypt_time_seconds', 'Time spent decrypting')
+# Decorate function with metric.
+@decrypt_time.time()
 def decrypt(key,  data):
     cstate = [0x48,  0x74,  0x65,  0x6D,  0x70,  0x39,  0x39,  0x65]
     shuffle = [2, 4, 0, 7, 1, 6, 5, 3]
@@ -42,11 +53,6 @@ def decrypt(key,  data):
 
     return out
 
-def hd(d):
-    return " ".join("%02X" % e for e in d)
-
-def now():
-    return int(time.time())
 
 
 if __name__ == "__main__":
