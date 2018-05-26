@@ -6,7 +6,7 @@
 # https://blog.wooga.com/woogas-office-weather-wow-67e24a5338
 
 import os, sys, fcntl, time, socket
-from prometheus_client import start_http_server, Gauge, Summary
+from prometheus_client import start_http_server, Gauge, Summary, Counter
 import requests
 
 
@@ -81,10 +81,14 @@ if __name__ == "__main__":
     co2_metric = Gauge('co2_value', 'Current CO_2 Value from sensor')
     temperature_metric = Gauge('temperature_value', 'Current Temperature Value from sensor')
 
+    # define loop counter
+    loop_counter = Counter('loops_total', 'Number of loops to query the sensor for values')
+
     # Start up the server to expose the metrics.
     start_http_server(8000)
 
     while True:
+        loop_counter.inc()
         data = list(ord(e) for e in fp.read(8))
         decrypted = decrypt(key, data)
         if decrypted[4] != 0x0d or (sum(decrypted[:3]) & 0xff) != decrypted[3]:
