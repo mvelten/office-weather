@@ -5,7 +5,7 @@ services:
     image: sensor
     privileged: true
     volumes: 
-      - /dev/hidraw6:/dev/hidraw0
+      - /dev/hidraw1:/dev/hidraw0
     ports:
       - 8080:8000
 
